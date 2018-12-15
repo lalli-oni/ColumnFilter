@@ -22,8 +22,6 @@ var Column = function Column(name) {
 		value = value.toLowerCase();
 		// Escape Regex reserved characters
 		value = value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\\\$&");
-		// Anchor the regex to the string start
-		value = "^" + value;
 		// Create the RegExp object to compare with others
 		// DEV-NOTE: Rather wasteful, we can get rid of this for performance improvements
 		let comparedRegex = new RegExp(value);
@@ -73,7 +71,8 @@ var Column = function Column(name) {
  * ColumnFilter Module namespace
  */
 var ColumnFilter = {
-	columns: [] // Holds columns classified as being filterable
+	table: null
+	,columns: [] // Holds columns classified as being filterable
 	
 	/**
 	 * Gets column based on name
@@ -148,7 +147,7 @@ var ColumnFilter = {
 		// Escape regular expression reserved characters
 		patternText = patternText.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 		// Creates the Regular expression. Matches on any substring
-		let regex = new RegExp('.*^(' + patternText.toLowerCase() + ').*', 'i');
+		let regex = new RegExp('.*(' + patternText.toLowerCase() + ').*', 'i');
 		regex.Inverse = inverse;
 		return regex;
 	}
@@ -214,7 +213,7 @@ var ColumnFilter = {
 		$('<input />', {
 			class: 'columnFilter textFilter',
 			type: 'text',
-			'data-column-name': column.getColumnOnName
+			'data-column-name': column.Name
 			,keyup: function(e) {
 				// Gets the associated column
 				let column = ColumnFilter.getColumnOnName($(this).data('columnName'));
@@ -242,14 +241,15 @@ var ColumnFilter = {
 						$('th.searchable[data-property-name="' + column.Name + '"]').removeClass('filteredColumn');
 					}
 					$(this).focusout(); // Removes focus on the text field
-					table.draw();
+					ColumnFilter.table.draw();
 				}
 			}
 		}).appendTo(container);
 	}
 
 	// Creates the column filters on all columns including 'searchable' class
-	,populateColumnFilters: function(results){
+	,populateColumnFilters: function(table, results){
+		this.table = table;
 		// Creates a linq like enumberable object from results
 		// Library: https://archive.codeplex.com/?p=linqjs
 		let enumeratedResults = Enumerable.from(results);
@@ -267,7 +267,7 @@ var ColumnFilter = {
 				$('.columnFilter.textFilter').val('');
 				ColumnFilter.clearAllFilters();
 				table.search(''); // Clears the global filter
-				table.draw();
+				ColumnFilter.table.draw();
 			}
 		}).appendTo($('#resultTable_wrapper > .top'));
 
@@ -369,7 +369,7 @@ var ColumnFilter = {
 						if(column.Filters.length === 0) {
 							$('th.searchable[data-property-name="' + column.Name + '"]').removeClass('filteredColumn');
 						}
-						table.draw();
+						ColumnFilter.table.draw();
 					}
 					else {
 						// Unchecking all
@@ -397,7 +397,7 @@ var ColumnFilter = {
 						});
 						
 						$('th.searchable[data-property-name="' + column.Name + '"]').addClass('filteredColumn');
-						table.draw();
+						ColumnFilter.table.draw();
 						$('#searchingSpinner').hide();
 					}
 					// DEV-NOTE: Leaving this in for now to do basic benchmarking
@@ -430,7 +430,7 @@ var ColumnFilter = {
 							ColumnFilter.columns[columnIndex].Filters.push('(Blanks)');
 							$('th.searchable[data-property-name="' + column.Name + '"]').addClass('filteredColumn');
 						}
-						table.draw();
+						ColumnFilter.table.draw();
 					}
 				}).appendTo(filterContainer);
 				// Making the corresponding label
@@ -475,7 +475,7 @@ var ColumnFilter = {
 								
 								$(this).prop('checked', true);
 							}
-							table.draw();
+							ColumnFilter.table.draw();
 						}
 					}).appendTo(filterContainer);
 					// Making the corresponding label
