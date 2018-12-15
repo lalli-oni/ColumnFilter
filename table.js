@@ -2,7 +2,11 @@
 $(document).ready(function() {
     let dataset = prepareDataset(300);
     // Initializes the DataTables table with generated dataset
-    initializeTable(dataset);
+    let table = initializeTable(dataset);
+    
+	if (typeof ColumnFilter !== 'undefined') {
+		ColumnFilter.populateColumnFilters(table, dataset);
+    }
 });
 
 /**
@@ -41,9 +45,6 @@ function prepareDataset(size) {
         dataset.push( { FullName: fullName, Age: age, Profession: jobTitle } );
     }
 
-	if (typeof ColumnFilter !== 'undefined') {
-		ColumnFilter.populateColumnFilters(dataset);
-    }
     
     return dataset; 
 }
@@ -54,7 +55,7 @@ function prepareDataset(size) {
  * @param {Array} dataset The dataset used to populate the table 
  */
 function initializeTable(dataset) {
-    $('#datatable').DataTable( {
+    return $('#datatable').DataTable( {
         data: dataset
         ,columns: [
             { data: "FullName" }
