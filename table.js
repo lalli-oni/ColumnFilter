@@ -26,17 +26,25 @@ Math.randomBetween = function(min, max) {
 function prepareDataset(size) {
     let dataset = [];
     // Static data values for generation
-    let firstNames = [ "Bob", "Frank", "Lucie", "Amanda", "Guybrush", "Zaphod", "Ford" ];
-    let lastNames = [ "Smith", "Baker", "Johannsson", "Threpwood", "Beeblebrox", "Prefect" ];
-    let professions = [ "Baker", "Developer", "Architect", "Toilet Diver", "Criminal" ];
-    let titles = [ "Global", "Manager", "Assistant", ""]
+    let firstNames = [ "Bob", "Frank", "Lucie", "Amanda", "Guybrush", "Zaphod", "Ford", "Bethany", "Ada"
+                        , "Grace", "Margaret", "Charles", "Marvin" ];
+    let lastNames = [ "Smith", "Baker", "Johannsson", "Threpwood", "Beeblebrox", "Prefect", "Dinkins"
+                        , "Lovelace", "Hopper", "Hamilton", "Babbage", "Manson" ];
+    let professions = [ "Baker", "Developer", "Architect", "Toilet Diver", "Criminal", "Sims wrangler"
+                        , "Flower insulter", "Panda inspector", "Boredom queller" ];
+    let titles = [ "Global", "Manager", "Assistant", "Junior", "", "", "", ""]
     // Iterates as many times as the requested size of dataset
     for (let i = 0; i < size; i++) {
         let fullName = firstNames[i % firstNames.length] + " " + lastNames[i % lastNames.length];
         let age = Math.randomBetween(18, 50);
         let jobTitle = titles[i % titles.length] + " " + professions[i % professions.length];
-        dataset.push([fullName, age, jobTitle]);
+        dataset.push( { FullName: fullName, Age: age, Profession: jobTitle } );
     }
+
+	if (typeof ColumnFilter !== 'undefined') {
+		ColumnFilter.populateColumnFilters(dataset);
+    }
+    
     return dataset; 
 }
 
@@ -49,9 +57,9 @@ function initializeTable(dataset) {
     $('#datatable').DataTable( {
         data: dataset
         ,columns: [
-            { title: "Name" }
-            ,{ title: "Age" }
-            ,{ title: "Job" }
+            { data: "FullName" }
+            ,{ data: "Age" }
+            ,{ data: "Profession" }
         ]        
     });
 }
